@@ -1,12 +1,3 @@
-from tqdm import tqdm
-from PIL import Image
-from sklearn.metrics import roc_auc_score
-
-from functools import partial
-import glob
-import sklearn
-import sys
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -46,39 +37,29 @@ def parse_args():
 if __name__ == '__main__':
 
     args = parse_args()
+    print(args.data_dir)
 
     ###############################
     ########## Load Data ##########
     ###############################
+
     train_x = pd.read_pickle(os.path.join(args.data_dir, 'train_x_v2.pkl'))
     train_y = pd.read_pickle(os.path.join(args.data_dir, 'train_y_v2.pkl'))
     val_x = pd.read_pickle(os.path.join(args.data_dir, 'val_x_v2.pkl'))
     val_y = pd.read_pickle(os.path.join(args.data_dir, 'val_y_v2.pkl'))
     test_x = pd.read_pickle(os.path.join(args.data_dir, 'test_x_v2.pkl'))
     test_y = pd.read_pickle(os.path.join(args.data_dir, 'test_y_v2.pkl'))
-    print("Input Features: ", train_x.columns)
-    print("Prediction Features: ", train_y.columns)
+    print("Input Features: ", test_x.columns)
+    print("Prediction Features: ", test_y.columns)
 
     if args.model == 'lgb':
         model = LGBTrainer(boosting_type='gbdt', metric='rmse', lr=0.1, epoch=100)
+        test_y_pred = model.test(args.model_dir, test_x)
     elif args.model == 'kernel_ridge':
-        model = KRTrainer(kernel='rbf', alpha=0.2)
-    elif args.model == 'knn':
-        model = KNNTrainer(n_neighbors=[3, 5, 7, 9])
-
-    model.train(train_x, train_y, val_x, val_y, args.model_dir)
+        model = KRTrainer(kernel='rbf', alpha=1.0)
+        test_y_pred = model.test(args.model_dir, train_x, train_y, test_x)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+    print("Prediction: \n", test_y_pred)
+    print("\nTrue: \n", test_y)
