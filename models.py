@@ -174,7 +174,7 @@ class KRTrainer:
             clf = KernelRidge(kernel=self.kernel, alpha=self.alpha)
             # clf.fit(train_x, train_y[target])
             model_path = os.path.join(model_dir, 'KR_model_' + target + '.npy')
-            clf_param = vars(np.load(model_path, allow_pickle=True))
+            clf_param = np.load(model_path, allow_pickle=True)
             print(clf_param.dtype)
             clf.set_params(**clf_param)
             y_preds[target] = clf.predict(test_x)
