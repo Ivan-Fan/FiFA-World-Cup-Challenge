@@ -166,8 +166,7 @@ def get_test_data(input_feat, output_feat, test_match, test_result, fifa_ranking
                                 "Korea" : "Korea Republic"})
     world_cup = world_cup.set_index('Team')
 
-    world_cup_rankings = rankings.loc[(rankings['rank_date'] == rankings['rank_date'].max()) & 
-                                        rankings['country_full'].isin(world_cup.index.unique())]
+    world_cup_rankings = rankings.loc[(rankings['rank_date'] == rankings['rank_date'].max())]
     world_cup_rankings = world_cup_rankings.set_index(['country_full'])
 
     for i in range(len(test_match)):
@@ -245,8 +244,8 @@ if __name__ == "__main__":
               'away_team_mean_offense_score', 'away_team_mean_midfield_score']
 
     output_feat = ['home_score', 'away_score']
-    cur_year = args.cur_year
-
+    cur_year = int(args.cur_year)
+    
     train_x, train_y, val_x, val_y = get_training_data(input_feat, output_feat, train_ratio=0.8)
 
     if cur_year == 2018:
@@ -257,6 +256,13 @@ if __name__ == "__main__":
         test_x.to_pickle(os.path.join(save_dir, f'test_{cur_year}_x.pkl'))
         test_y.to_pickle(os.path.join(save_dir, f'test_{cur_year}_y.pkl'))
 
+    if cur_year == 2022:
+        test_match = pd.DataFrame(np.array([['Croatia', 'Brazil'], ['Netherlands', 'Argentina'], ['Morocco', 'Portugal'], ['England', 'France']]), columns=['home', 'away'])
+        test_result = pd.DataFrame(np.array([[0, 2], [1, 2], [0,2], [3, 4]]), columns=['home_score', 'away_score'])
+        
+        test_x, test_y = get_test_data(input_feat, output_feat, test_match, test_result, fifa_ranking_df, cur_year, data_path=raw_data_dir)
+        test_x.to_pickle(os.path.join(save_dir, f'test_{cur_year}_x.pkl'))
+        test_y.to_pickle(os.path.join(save_dir, f'test_{cur_year}_y.pkl'))
 
     train_x.to_pickle(os.path.join(save_dir, 'train_x.pkl'))
     train_y.to_pickle(os.path.join(save_dir, 'train_y.pkl'))
