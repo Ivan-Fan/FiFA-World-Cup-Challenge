@@ -215,8 +215,8 @@ def get_test_data(input_feat, output_feat, test_match, test_result, fifa_ranking
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', help='data directory', default='./data')
-    parser.add_argument('--raw_data_dir', help='data directory', default='./raw_data')
+    parser.add_argument('--data_dir', help='data directory', default='./data/V2')
+    parser.add_argument('--raw_data_dir', help='data directory', default='./data/raw_data')
     parser.add_argument('--cur_year', help='test data year', default=2018)
     args = parser.parse_args()
 
