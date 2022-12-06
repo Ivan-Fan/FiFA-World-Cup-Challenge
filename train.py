@@ -20,7 +20,7 @@ import lightgbm as lgb
 import sklearn
 
 import argparse
-from sklearn.metrics import mean_squared_error, mean_squared_log_error, r2_score
+from utils import metrics
 
 from models import *
 
@@ -65,10 +65,23 @@ if __name__ == '__main__':
         model = KRTrainer(kernel='rbf', alpha=0.2)
     elif args.model == 'knn':
         model = KNNTrainer(n_neighbors=[3, 5, 7, 9])
+    elif args.model == 'poisson':
+        model = PoissonRegressor(alpha=0.1)
 
     model.train(train_x, train_y, val_x, val_y, args.model_dir)
-
-
+    # show the train metric / val metric
+    train_mse, train_rmsle, train_r2 = metrics(train_y, model.test(args.model_dir, train_x, train_y, train_x))
+    val_mse, val_rmsle, val_r2 = metrics(val_y, model.test(args.model_dir, train_x, train_y, val_x))
+    test_mse, test_rmsle, test_r2 = metrics(test_y, model.test(args.model_dir, train_x, train_y, test_x))
+    print(f"Train set RMSE = {train_mse}")
+    print(f"Train set RMSLE = {train_rmsle}")
+    print(f"Train set R2 = {train_r2}")
+    print(f"Valid set RMSE = {val_mse}")
+    print(f"Valid set RMSLE = {val_rmsle}")
+    print(f"Valid set R2 = {val_r2}")
+    print(f"Test set RMSE = {test_mse}")
+    print(f"Test set RMSLE = {test_rmsle}")
+    print(f"Test set R2 = {test_r2}")
 
 
 

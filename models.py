@@ -25,6 +25,7 @@ from sklearn.kernel_ridge import KernelRidge
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import PoissonRegressor
 
 from typing import List
 
@@ -74,7 +75,7 @@ class LGBTrainer:
                 'rmsle': 0.0,
                 'r2': 0.0,
             }
-            X_train = train_x  # [columns]
+            X_train = train_x
 
             dtrain = lgb.Dataset(X_train, label=y_train)
             dvalid = lgb.Dataset(val_x, label=y_val)
@@ -94,9 +95,9 @@ class LGBTrainer:
             scores['r2'] = r2_score(y_val, y_pred_valid)
             print(f"RMSE: {scores['rmse']} | RMSLE: {scores['rmsle']} | R2: {scores['r2']}")
 
-            rmse += scores['rmse']  # / NFOLDS
-            rmsle += scores['rmsle']  # / NFOLDS
-            r2 += scores['r2']  # / NFOLDS
+            rmse += scores['rmse']
+            rmsle += scores['rmsle']
+            r2 += scores['r2']
 
             clf.save_model(os.path.join(save_dir, 'lgb_model_' + target + '.txt'))
 
@@ -225,4 +226,33 @@ class KNNTrainer:
             y_preds[target] = clf.predict(test_x)
             y_preds[target][y_preds[target] < 0] = 0
 
+        return y_preds
+
+
+class PoissonRegressor:
+    def __init__(self, alpha: 0.1):
+        self.alpha = alpha
+
+    def train(self, train_x, train_y, val_x, val_y, save_dir):
+
+        # uncomment for grid search
+        # clf = MultiOutputRegressor(PoissonRegressor())
+        # alpha = [0.1, 0.2]
+        # params = {'estimator__alpha': alpha}
+        # regressor = GridSearchCV(clf, params, refit=False)
+        # regressor.fit(train_x, train_y)
+        # print("Best parameters: {}".format(regressor.best_params_))
+
+        clf = MultiOutputRegressor(PoissonRegressor(alpha=self.alpha))
+        clf.fit(train_x, train_y)
+        clf_param = clf.get_params()
+        print(clf_param)
+        np.save(os.path.join(save_dir, 'Poisson_model.npy'), clf_param)
+
+    def test(self, model_dir, train_x, train_y, test_x):
+        clf = MultiOutputRegressor(PoissonRegressor(alpha=self.alpha))
+        model_path = os.path.join(model_dir, 'Poisson_model.npy')
+        clf_param = np.load(model_path, allow_pickle=True)
+        clf.set_params(**clf_param)
+        y_preds = clf.predict(test_x)
         return y_preds
