@@ -262,7 +262,6 @@ if __name__ == "__main__":
         
         test_x, test_y = get_test_data(input_feat, output_feat, test_match, test_result, fifa_ranking_df, cur_year, data_path=raw_data_dir)
         test_x.to_pickle(os.path.join(save_dir, f'test_{cur_year}_x.pkl'))
-        test_y.to_pickle(os.path.join(save_dir, f'test_{cur_year}_y.pkl'))
 
     train_x.to_pickle(os.path.join(save_dir, 'train_x.pkl'))
     train_y.to_pickle(os.path.join(save_dir, 'train_y.pkl'))
