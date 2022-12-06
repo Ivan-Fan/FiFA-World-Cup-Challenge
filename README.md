@@ -4,7 +4,7 @@
 
 This is the course project of 18797 CMU, named FIFA World Cup Challenge
 
-Team Members: Fan Yang, Fuyu Tang, Changsheng Su, Chongyi Zheng
+Team Members: Fan Yang, Fuyu Tang, Changsheng Su, Chongyi Zheng. Thank you for your time and effort!
 
 ## Abstract
 
