@@ -1,6 +1,8 @@
 # FiFA-World-Cup-Challenge
 
-> Can you predict who will win the next World Cup using Machine Learning?
+> Can you predict who will win FIFA World Cup Qatar 2022 using Machine Learning?
+
+![](pic/cup.jpg)
 
 This is the course project of 18797 CMU, named FIFA World Cup Challenge
 
@@ -22,10 +24,18 @@ FIFA World Cup [1] is the most famous football competition in the world and it w
 
    ```python
    .
-   ├── data
-   ├── train.py
    ├── README.md
-   └── requirements.txt
+   ├── data
+   │   ├── V1
+   │   ├── V2
+   │   └── raw_data
+   ├── data_preparation.py
+   ├── models
+   ├── models.py
+   ├── pic
+   ├── requirements.txt
+   ├── train.py
+   └── utils.py
    ```
 
 ## Data
@@ -35,7 +45,7 @@ FIFA World Cup [1] is the most famous football competition in the world and it w
 2. To preprocess the data
 
    ```python
-   python preprocess_data.py
+   python data_preparation.py
    ```
 
 3. 
@@ -62,7 +72,23 @@ FIFA World Cup [1] is the most famous football competition in the world and it w
 
 ## Results
 
+1. Results for regression-based model
 
+   | Model | Scale    | Test MSE on V1 | Test R2   on V1 | Test ACC on V1 | Test MSE on V2 | Test R2  on V2 | Test ACC on V2 |
+   | :---: | :------: | :------------: | :-----------: | :------------: | :-----------: | :------------: | :------------: |
+   | PR    | Standard |     2.1654     | -1.1983 | 0.5 | 1.4530 | -1.2368 | 0.5 |
+   | RF    | None     | 2.2198 | -1.2657 | 0.25 |                |                |                |
+   | GB    | None     | 2.1726 | -1.2065 | 0.25 | 1.9732 | -0.9924 | 0. |
+   | KRR   | Standard | 2.1813 | -1.2546 | 0.5 |               |                |                 |
+   | LGB   | MinMax   | 2.0754 | -1.1583 | 0.5 | 1.3259 | -0.1720 | 0.5 |
+
+   
+
+2. Results for classification-based model
+
+   
+
+2. 
 
 ## References
 
