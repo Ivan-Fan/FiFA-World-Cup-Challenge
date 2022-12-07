@@ -4,6 +4,8 @@
 
 ![Logo FIFA World Cup Qatar 2022 yang berlangsung di Qatar.-skysports.com-](pic/cup.jpg)
 
+*(Source: https://www.fifa.com/fifaplus/en/tournaments/mens/worldcup/qatar2022)*
+
 This is the course project of 18797 CMU, named FIFA World Cup Challenge
 
 Team Members: Fan Yang, Fuyu Tang, Changsheng Su, Chongyi Zheng. Thanks for your time and effort!
