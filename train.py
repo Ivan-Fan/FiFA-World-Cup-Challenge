@@ -34,11 +34,11 @@ def parse_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--data-dir', help='data directory', default='data/V2')
-    parser.add_argument('--data-suffix', type=int, help='data version', default=3)
-    parser.add_argument('--model', type=str, help="Model: ['lgb', 'kernelridge', 'gradientboosting', 'knn', 'poisson']",
+    parser.add_argument('--cur-year', type=int, help='test data version', default=2018)
+    parser.add_argument('--model', type=str, help="Model: ['lgb', 'kernel_ridge', 'gradient_boosting', 'knn', 'poisson']",
                         choices=['lgb', 'kernel_ridge', 'gradient_boosting', 'knn', 'poisson'], default='lgb')
 
-    parser.add_argument('--model-dir', help='model directory', default='models')
+    parser.add_argument('--model-dir', help='Directory for saving trained model files', default='models')
     args = parser.parse_args()
 
     return args
@@ -55,8 +55,8 @@ if __name__ == '__main__':
     train_y = pd.read_pickle(os.path.join(args.data_dir, 'train_y.pkl'))
     val_x = pd.read_pickle(os.path.join(args.data_dir, 'val_x.pkl'))
     val_y = pd.read_pickle(os.path.join(args.data_dir, 'val_y.pkl'))
-    test_x = pd.read_pickle(os.path.join(args.data_dir, 'test_2018_x.pkl'))
-    test_y = pd.read_pickle(os.path.join(args.data_dir, 'test_2018_y.pkl'))
+    test_x = pd.read_pickle(os.path.join(args.data_dir, 'test_{}_x.pkl'.format(args.cur_year)))
+    test_y = pd.read_pickle(os.path.join(args.data_dir, 'test_{}_y.pkl'.format(args.cur_year)))
     print("Input Features: ", train_x.columns)
     print("Prediction Features: ", train_y.columns)
 
