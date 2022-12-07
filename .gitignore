@@ -1,2 +1,7 @@
 
 .DS_Store
+*.pyc
+*.iml
+*.xml
+*.iml
+*.iml

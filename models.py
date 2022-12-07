@@ -7,6 +7,10 @@ import glob
 import sklearn
 import sys
 
+from sklearn.multioutput import MultiOutputRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.model_selection import GridSearchCV
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -116,7 +120,7 @@ class LGBTrainer:
         plt.show()
 
 
-    def test(self, model_dir, test_x):
+    def test(self, model_dir, train_x, train_y, test_x):
 
         y_preds = pd.DataFrame()
 
@@ -246,7 +250,6 @@ class PoissonRegressor:
         clf = MultiOutputRegressor(PoissonRegressor(alpha=self.alpha))
         clf.fit(train_x, train_y)
         clf_param = clf.get_params()
-        print(clf_param)
         np.save(os.path.join(save_dir, 'Poisson_model.npy'), clf_param)
 
     def test(self, model_dir, train_x, train_y, test_x):
