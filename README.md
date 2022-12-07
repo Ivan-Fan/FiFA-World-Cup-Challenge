@@ -2,7 +2,7 @@
 
 > Can you predict which team will win FIFA World Cup Qatar 2022?
 
-![](pic/cup.jpg)
+![Logo FIFA World Cup Qatar 2022 yang berlangsung di Qatar.-skysports.com-](pic/cup.jpg)
 
 This is the course project of 18797 CMU, named FIFA World Cup Challenge
 
@@ -40,7 +40,7 @@ FIFA World Cup [1] is the most famous football competition in the world and it w
 
 ## Data
 
-1. This project has drawn datasets such as [FiFA World Cup](https://www.kaggle.com/datasets/abecklas/fifa-world-cup?resource=download&select=WorldCupMatches.csv), [FIFA Rankings](https://www.kaggle.com/code/agostontorok/soccer-world-cup-2018-winner/data), [Player Score](https://www.kaggle.com/datasets/stefanoleone992/fifa-22-complete-player-dataset?select=players_22.csv), [International Matches](https://www.kaggle.com/datasets/brenda89/fifa-world-cup-2022) from Kaggle. It is recommended to put them under directory `data/raw_data`.
+1. This project has collected and preprocessed the soccer datasets from Kaggle, e.g., [FiFA World Cup](https://www.kaggle.com/datasets/abecklas/fifa-world-cup?resource=download&select=WorldCupMatches.csv), [FIFA Rankings](https://www.kaggle.com/code/agostontorok/soccer-world-cup-2018-winner/data), [Player Score](https://www.kaggle.com/datasets/stefanoleone992/fifa-22-complete-player-dataset?select=players_22.csv), [International Matches](https://www.kaggle.com/datasets/brenda89/fifa-world-cup-2022) . It is recommended to put them under directory `data/raw_data`.
 
 2. To preprocess the data:
 
