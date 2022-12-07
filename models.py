@@ -6,10 +6,11 @@ from functools import partial
 import glob
 import sklearn
 import sys
+import joblib
 
 from sklearn.multioutput import MultiOutputRegressor
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 
 import pandas as pd
 import numpy as np
@@ -293,13 +294,86 @@ class PoissonRegressor:
 
         clf = MultiOutputRegressor(PoissonRegressor(alpha=self.alpha))
         clf.fit(train_x, train_y)
-        clf_param = clf.get_params()
-        np.save(os.path.join(save_dir, 'Poisson_model.npy'), clf_param)
+        # save
+        joblib.dump(clf, os.path.join(save_dir, "Poisson_model.pkl"))
 
     def test(self, model_dir, train_x, train_y, test_x):
-        clf = MultiOutputRegressor(PoissonRegressor(alpha=self.alpha))
-        model_path = os.path.join(model_dir, 'Poisson_model.npy')
-        clf_param = np.load(model_path, allow_pickle=True)
-        clf.set_params(**clf_param)
+        clf = joblib.load(os.path.join(model_dir, "Poisson_model.pkl"))
         y_preds = clf.predict(test_x)
         return y_preds
+
+
+class GradientBoostTrainer:
+    def __init__(self, lr=0.05, n_estimators=100):
+        self.lr = lr
+        self.n_estimators = n_estimators
+
+    def train(self, train_x, train_y, val_x, val_y, save_dir):
+        # uncomment for the grid search
+        # gbr = MultiOutputRegressor(GradientBoostingRegressor())
+        #
+        # lrs = [0.001, 0.005, 0.01, 0.05, 0.1]
+        # params = {'estimator__learning_rate': lrs, 'estimator__n_estimators': [100]}
+        # tscv = TimeSeriesSplit(n_splits=5)
+        # regressor = GridSearchCV(gbr, params, cv=tscv, refit=False)
+        # regressor.fit(train_x, train_y)
+        #
+        # print("Best parameters: {}".format(regressor.best_params_))
+        #
+        # scores = regressor.cv_results_["mean_test_score"]
+        # scores_std = regressor.cv_results_["std_test_score"]
+        #
+        # plt.figure().set_size_inches(6, 6)
+        # plt.plot(lrs, scores, marker='o')
+        # plt.fill_between(lrs, scores - scores_std,
+        #                  scores + scores_std,
+        #                  alpha=0.5)
+        # plt.xticks(lrs)
+        # plt.xscale('log')
+        # plt.xlabel("Learning Rate")
+        # plt.ylabel("Score")
+        # plt.show()
+        gbr = MultiOutputRegressor(GradientBoostingRegressor(
+            learning_rate=self.lr, n_estimators=self.n_estimators))
+        gbr.fit(train_x, train_y)
+        # gbr_param = gbr.get_params()
+        # np.save(os.path.join(save_dir, 'GradientBoost_model.npy'), gbr_param)
+        # save
+        joblib.dump(gbr, os.path.join(save_dir,"GradientBoost_model.pkl"))
+
+
+    def test(self, model_dir, train_x, train_y, test_x):
+        gbr = joblib.load(os.path.join(model_dir, "GradientBoost_model.pkl"))
+        y_preds = gbr.predict(test_x)
+        return y_preds
+
+class RandomForestTrainer:
+    def __init__(self, max_depth=2):
+        self.max_depth = max_depth
+
+    def train(self, train_x, train_y, val_x, val_y, save_dir):
+
+        # uncomment for grid search
+        # rfr = MultiOutputRegressor(RandomForestRegressor())
+        # dpt = [2, 6, 10]
+        # params = {"estimator__max_depth": dpt,
+        #           "estimator__min_samples_split": [1, 3, 10],
+        #           "estimator__min_samples_leaf": [1, 3, 10]}
+        # # # "bootstrap": [True, False],
+        # # "classifier__criterion": ["gini", "entropy"]}
+        # tscv = TimeSeriesSplit(n_splits=5)
+        # regressor = GridSearchCV(rfr, params, cv=tscv, refit=False)
+        # regressor.fit(train_x, train_y)
+        # print("Best parameters: {}".format(regressor.best_params_))
+
+        rfr = MultiOutputRegressor(RandomForestRegressor(
+            max_depth=2))
+        rfr.fit(train_x, train_y)
+        # save
+        joblib.dump(rfr, os.path.join(save_dir, "RandomForest_model.pkl"))
+
+    def test(self, model_dir, train_x, train_y, test_x):
+        rfr = joblib.load(os.path.join(model_dir, 'RandomForest_model.pkl'))
+        y_preds = rfr.predict(test_x)
+        return y_preds
+

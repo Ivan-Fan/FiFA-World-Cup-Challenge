@@ -34,9 +34,15 @@ def parse_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--data-dir', help='data directory', default='data/V2')
+<<<<<<< HEAD
+    parser.add_argument('--data-suffix', type=int, help='data version', default=3)
+    parser.add_argument('--model', type=str, help="Model: ['lgb', 'kernelridge', 'gradientboosting', 'knn', 'poisson', 'gradient_boost', 'random_forest']",
+                        choices=['lgb', 'kernel_ridge', 'gradient_boosting', 'knn', 'poisson', 'gradient_boost', 'random_forest'], default='lgb')
+=======
     parser.add_argument('--cur-year', type=int, help='test data version', default=2018)
     parser.add_argument('--model', type=str, help="Model: ['lgb', 'kernel_ridge', 'gradient_boosting', 'knn', 'poisson']",
                         choices=['lgb', 'kernel_ridge', 'gradient_boosting', 'knn', 'poisson'], default='lgb')
+>>>>>>> dd844c8ae62b4d49d33aa229761ec7c091168a59
 
     parser.add_argument('--model-dir', help='Directory for saving trained model files', default='models')
     args = parser.parse_args()
@@ -68,8 +74,15 @@ if __name__ == '__main__':
         model = KNNTrainer(n_neighbors=[3, 5, 7, 9])
     elif args.model == 'poisson':
         model = PoissonRegressor(alpha=0.1)
+<<<<<<< HEAD
+    elif args.model == 'gradient_boost':
+        model = GradientBoostTrainer(lr=0.05, n_estimators=100)
+    elif args.model == 'random_forest':
+        model = RandomForestTrainer(max_depth=2)
+=======
     elif args.model == 'gradient_boosting':
         model = GradientBoostingTrainer(lrs=[0.001, 0.005, 0.01, 0.05, 0.1], n_estimators=100)
+>>>>>>> dd844c8ae62b4d49d33aa229761ec7c091168a59
 
     model.train(train_x, train_y, val_x, val_y, args.model_dir)
     # show the train metric / val metric
