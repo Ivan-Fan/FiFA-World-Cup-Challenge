@@ -92,16 +92,3 @@ if __name__ == '__main__':
     print(f"Test set RMSE = {test_mse}")
     print(f"Test set RMSLE = {test_rmsle}")
     print(f"Test set R2 = {test_r2}")
-
-
-
-
-
-
-
-
-
-
-
-
-
