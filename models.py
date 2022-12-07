@@ -189,48 +189,48 @@ class KRTrainer:
         return y_preds
 
 
-class GradientBoostingTrainer:
-    def __init__(self, lrs: List, n_estimators: int = 100):
-        self.lrs = lrs if lrs else [0.001, 0.005, 0.01, 0.05, 0.1]
-        self.n_estimators = n_estimators
-
-    def train(self, train_x, train_y, val_x, val_y, save_dir):
-
-        os.makedirs(save_dir, exist_ok=True)
-        input_feat = train_x.columns
-        output_feat = train_y.columns
-
-        gbr = MultiOutputRegressor(GradientBoostingRegressor())
-
-        lrs = self.lrs
-        params = {'estimator__learning_rate': lrs,
-                  'estimator__n_estimators': [self.n_estimators]}
-        clf = GridSearchCV(gbr, params, refit=True)
-        clf.fit(train_x, train_y)
-
-        print("Best parameters: {}".format(clf.best_params_))
-
-        val_y_preds = clf.predict(val_x)
-
-        print(f"Val set RMSE = {mean_squared_error(val_y, val_y_preds, squared=False)}")
-        print(f"Val set RMSLE = {mean_squared_log_error(val_y, val_y_preds, squared=False)}")
-        print(f"Val set R2 = {r2_score(val_y, val_y_preds)}")
-
-    def test(self, model_dir, train_x, train_y, test_x):
-
-        y_preds = pd.DataFrame()
-
-        for target in ['home_score', 'away_score']:
-            # model_path = os.path.join(model_dir, 'KR_model_' + target + '.npy')
-            # clf_param = np.load(model_path, allow_pickle=True)
-
-            clf = KernelRidge(kernel=self.kernel, alpha=self.alpha)
-            clf.fit(train_x, train_y[target])
-
-            y_preds[target] = clf.predict(test_x)
-            y_preds[target][y_preds[target] < 0] = 0
-
-        return y_preds
+#class GradientBoostingTrainer:
+#    def __init__(self, lrs: List, n_estimators: int = 100):
+#        self.lrs = lrs if lrs else [0.001, 0.005, 0.01, 0.05, 0.1]
+#        self.n_estimators = n_estimators
+#
+#    def train(self, train_x, train_y, val_x, val_y, save_dir):
+#
+#        os.makedirs(save_dir, exist_ok=True)
+#        input_feat = train_x.columns
+#        output_feat = train_y.columns
+#
+#        gbr = MultiOutputRegressor(GradientBoostingRegressor())
+#
+#        lrs = self.lrs
+#        params = {'estimator__learning_rate': lrs,
+#                  'estimator__n_estimators': [self.n_estimators]}
+#        clf = GridSearchCV(gbr, params, refit=True)
+#        clf.fit(train_x, train_y)
+#
+#        print("Best parameters: {}".format(clf.best_params_))
+#
+#        val_y_preds = clf.predict(val_x)
+#
+#        print(f"Val set RMSE = {mean_squared_error(val_y, val_y_preds, squared=False)}")
+#        print(f"Val set RMSLE = {mean_squared_log_error(val_y, val_y_preds, squared=False)}")
+#        print(f"Val set R2 = {r2_score(val_y, val_y_preds)}")
+#
+#    def test(self, model_dir, train_x, train_y, test_x):
+#
+#        y_preds = pd.DataFrame()
+#
+#        for target in ['home_score', 'away_score']:
+#            # model_path = os.path.join(model_dir, 'KR_model_' + target + '.npy')
+#            # clf_param = np.load(model_path, allow_pickle=True)
+#
+#            clf = KernelRidge(kernel=self.kernel, alpha=self.alpha)
+#            clf.fit(train_x, train_y[target])
+#
+#            y_preds[target] = clf.predict(test_x)
+#            y_preds[target][y_preds[target] < 0] = 0
+#
+#        return y_preds
 
 
 class KNNTrainer:

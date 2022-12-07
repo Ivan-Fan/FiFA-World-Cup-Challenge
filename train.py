@@ -68,15 +68,12 @@ if __name__ == '__main__':
         model = KNNTrainer(n_neighbors=[3, 5, 7, 9])
     elif args.model == 'poisson':
         model = PoissonRegressor(alpha=0.1)
-<<<<<<< HEAD
     elif args.model == 'gradient_boost':
         model = GradientBoostTrainer(lr=0.05, n_estimators=100)
     elif args.model == 'random_forest':
         model = RandomForestTrainer(max_depth=2)
-=======
-    elif args.model == 'gradient_boosting':
-        model = GradientBoostingTrainer(lrs=[0.001, 0.005, 0.01, 0.05, 0.1], n_estimators=100)
->>>>>>> dd844c8ae62b4d49d33aa229761ec7c091168a59
+#    elif args.model == 'gradient_boosting':
+#        model = GradientBoostingTrainer(lrs=[0.001, 0.005, 0.01, 0.05, 0.1], n_estimators=100)
 
     model.train(train_x, train_y, val_x, val_y, args.model_dir)
     # show the train metric / val metric
