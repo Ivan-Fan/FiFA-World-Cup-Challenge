@@ -6,10 +6,6 @@
 
 *(Source: https://www.fifa.com/fifaplus/en/tournaments/mens/worldcup/qatar2022)*
 
-This is the course project of 18797 CMU, named FIFA World Cup Challenge.
-
-Team Members: Fan Yang, Fuyu Tang, Changsheng Su, Chongyi Zheng. Thanks for your time and effort!
-
 ## Abstract
 
 FIFA World Cup [1] is the most famous football competition in the world and it will be held from Nov 20, 2022 to Dec 18, 2022 [2]. In this project, we want to predict results of the quarterfinals as well as the exact goals scored by each team using Machine Learning algorithms. Aiming at those goals, we need to leverage massive amounts of data from historical tournaments of each team and ratings of individual players, which is well-suited for machine learning approaches. Specifically, predicting results can be modeled as a classification problem and predicting goals scored by each team can be modeled as a regression problem. To evaluate our method, we will use data from FIFA World Cup 2018 as validation and finally test prediction accuracy on FIFA World Cup 2022 quarterfinals.

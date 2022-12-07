@@ -72,10 +72,13 @@ if __name__ == '__main__':
         model = GradientBoostTrainer(lr=0.05, n_estimators=100)
     elif args.model == 'random_forest':
         model = RandomForestTrainer(max_depth=2)
-#    elif args.model == 'gradient_boosting':
-#        model = GradientBoostingTrainer(lrs=[0.001, 0.005, 0.01, 0.05, 0.1], n_estimators=100)
+
+    ###############################
+    ##### Train and Evaluate ######
+    ###############################
 
     model.train(train_x, train_y, val_x, val_y, args.model_dir)
+
     # show the train metric / val metric
     train_mse, train_rmsle, train_r2 = evaluate(train_y, model.test(args.model_dir, train_x, train_y, train_x))
     val_mse, val_rmsle, val_r2 = evaluate(val_y, model.test(args.model_dir, train_x, train_y, val_x))
