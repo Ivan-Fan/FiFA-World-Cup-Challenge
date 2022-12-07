@@ -6,7 +6,7 @@
 
 *(Source: https://www.fifa.com/fifaplus/en/tournaments/mens/worldcup/qatar2022)*
 
-This is the course project of 18797 CMU, named FIFA World Cup Challenge
+This is the course project of 18797 CMU, named FIFA World Cup Challenge.
 
 Team Members: Fan Yang, Fuyu Tang, Changsheng Su, Chongyi Zheng. Thanks for your time and effort!
 
@@ -86,24 +86,24 @@ P.S. In our V1 experiments, we observed the inbalance issues of feature importan
    | PR    | Standard |     2.1654     | -1.1983 | 0.5 | 1.4530 | -1.2368 | 0.5 |
    | RF    | None     | 2.2198 | -1.2657 | 0.25 |     1.4877     |    -1.2650     |      0.25      |
    | GB    | None     | 2.1726 | -1.2065 | 0.25 | 1.9732 | -0.9924 | 0.5 |
-   | KRR   | Standard | 2.1813 | -1.2546 | 0.5 |               |                |                 |
+   | KRR   | Standard | 2.1813 | -1.2546 | 0.5 | 1.9313 | -1.0260 | 0.75 |
    | LGB   | MinMax   | 2.0754 | -1.1583 | 0.5 | 1.3259 | -0.1720 | 0.5 |
-
-   
 
 2. Results for classification-based model
 
    | Model | Scale | Test Acc on V1 | Test Win Acc on V1 | Test Acc on V2 | Test Win Acc on V2 |
    | :---: | :---: | :------------: | :----------------: | :------------: | :----------------: |
-   |  KNN  | None  |     0.125      |        0.75        |                |                    |
+   |  KNN  | None  |     0.125      |        0.75        |     0.125      |        0.75        |
 
 3. Feature importance analysis
 
    ![](pic/feat_importance.png)
 
-4. Our final prediction results! Let's see!
 
-   
+
+Enjoy the World Cup 2022!
+
+
 
 ## References
 
