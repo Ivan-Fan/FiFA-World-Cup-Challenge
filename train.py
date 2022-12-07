@@ -34,16 +34,10 @@ def parse_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--data-dir', help='data directory', default='data/V2')
-<<<<<<< HEAD
     parser.add_argument('--data-suffix', type=int, help='data version', default=3)
     parser.add_argument('--model', type=str, help="Model: ['lgb', 'kernelridge', 'gradientboosting', 'knn', 'poisson', 'gradient_boost', 'random_forest']",
                         choices=['lgb', 'kernel_ridge', 'gradient_boosting', 'knn', 'poisson', 'gradient_boost', 'random_forest'], default='lgb')
-=======
     parser.add_argument('--cur-year', type=int, help='test data version', default=2018)
-    parser.add_argument('--model', type=str, help="Model: ['lgb', 'kernel_ridge', 'gradient_boosting', 'knn', 'poisson']",
-                        choices=['lgb', 'kernel_ridge', 'gradient_boosting', 'knn', 'poisson'], default='lgb')
->>>>>>> dd844c8ae62b4d49d33aa229761ec7c091168a59
-
     parser.add_argument('--model-dir', help='Directory for saving trained model files', default='models')
     args = parser.parse_args()
 
