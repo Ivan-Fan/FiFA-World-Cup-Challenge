@@ -244,9 +244,11 @@ class PoissonRegressor:
         # clf = MultiOutputRegressor(PoissonRegressor())
         # alpha = [0.1, 0.2]
         # params = {'estimator__alpha': alpha}
-        # regressor = GridSearchCV(clf, params, refit=False)
+        # tscv = TimeSeriesSplit(n_splits=5)
+        # regressor = GridSearchCV(clf, params, cv=tscv, refit=False)
         # regressor.fit(train_x, train_y)
         # print("Best parameters: {}".format(regressor.best_params_))
+        # print("Results: {}".format(regressor.cv_results_))
 
         clf = MultiOutputRegressor(PoissonRegressor(alpha=self.alpha))
         clf.fit(train_x, train_y)
@@ -265,6 +267,15 @@ class GradientBoostTrainer:
         self.n_estimators = n_estimators
 
     def train(self, train_x, train_y, val_x, val_y, save_dir):
+        # gbr = MultiOutputRegressor(GradientBoostingRegressor())
+        #
+        # lrs = [0.001, 0.005, 0.01, 0.05, 0.1]
+        # params = {'estimator__learning_rate': lrs, 'estimator__n_estimators': [100]}
+        # tscv = TimeSeriesSplit(n_splits=5)
+        # regressor = GridSearchCV(gbr, params, cv=tscv, refit=False)
+        # print("Best parameters: {}".format(regressor.best_params_))
+        # print("Results: {}".format(regressor.cv_results_))
+
         gbr = MultiOutputRegressor(GradientBoostingRegressor(
             learning_rate=self.lr, n_estimators=self.n_estimators))
         gbr.fit(train_x, train_y)
@@ -281,6 +292,20 @@ class RandomForestTrainer:
         self.max_depth = max_depth
 
     def train(self, train_x, train_y, val_x, val_y, save_dir):
+        # rfr = MultiOutputRegressor(RandomForestRegressor())
+        #
+        # dpt = [2, 6, 10]
+        # params = {"estimator__max_depth": dpt,
+        #           # "estimator__min_samples_split": [2, 3, 10],
+        #           # "estimator__min_samples_leaf": [1, 3, 10],
+        #           "estimator__bootstrap": [True, False],
+        #           "estimator__criterion": ["squared_error", "absolute_error", "friedman_mse", "poisson"]}
+        # tscv = TimeSeriesSplit(n_splits=5)
+        # regressor = GridSearchCV(rfr, params, cv=tscv, refit=False)
+        # regressor.fit(train_x, train_y)
+        # print("Best parameters: {}".format(regressor.best_params_))
+        # print("Results: {}".format(regressor.cv_results_))
+
         rfr = MultiOutputRegressor(RandomForestRegressor(
             max_depth=2))
         rfr.fit(train_x, train_y)
