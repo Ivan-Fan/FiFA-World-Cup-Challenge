@@ -35,8 +35,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data-dir', help='data directory', default='data/V2')
     parser.add_argument('--data-suffix', type=int, help='data version', default=3)
-    parser.add_argument('--model', type=str, help="Model: ['lgb', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest']",
-                        choices=['lgb', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest'], default='lgb')
+    parser.add_argument('--model', type=str, help="Model: ['lgb', 'lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier']",
+                        choices=['lgb','lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier'], default='lgb')
     parser.add_argument('--cur-year', type=int, help='test data version', default=2018)
     parser.add_argument('--model-dir', help='Directory for saving trained model files', default='models')
     args = parser.parse_args()
@@ -60,8 +60,13 @@ if __name__ == '__main__':
     print("Input Features: ", train_x.columns)
     print("Prediction Features: ", train_y.columns)
 
+    # print(np.max(np.concatenate([train_y, val_y, test_y], axis = 0)))
+    num_classes = int(np.max(np.concatenate([train_y, val_y, test_y], axis = 0))) + 1
+
     if args.model == 'lgb':
         model = LGBTrainer(boosting_type='gbdt', metric='rmse', lr=0.1, epoch=100)
+    elif args.model == 'lgb_classifier':
+        model = LGBClassifierTrainer(num_classes=num_classes, boosting_type='gbdt', metric='multiclass', lr=0.1, epoch=100)
     elif args.model == 'kernel_ridge':
         model = KRTrainer(kernel='rbf', alpha=0.2)
     elif args.model == 'knn':
@@ -72,6 +77,9 @@ if __name__ == '__main__':
         model = GradientBoostTrainer(lr=0.05, n_estimators=100)
     elif args.model == 'random_forest':
         model = RandomForestTrainer(max_depth=2)
+    elif args.model == 'random_forest_classifier':
+        model = RandomForestClassifierTrainer(max_depth=6)
+
 
     ###############################
     ##### Train and Evaluate ######
@@ -83,6 +91,8 @@ if __name__ == '__main__':
     train_mse, train_rmsle, train_r2 = evaluate(train_y, model.test(args.model_dir, train_x, train_y, train_x))
     val_mse, val_rmsle, val_r2 = evaluate(val_y, model.test(args.model_dir, train_x, train_y, val_x))
     test_mse, test_rmsle, test_r2 = evaluate(test_y, model.test(args.model_dir, train_x, train_y, test_x))
+    print("test: \n",test_y)
+    print("pred: \n", model.test(args.model_dir, train_x, train_y, test_x))
     print(f"Train set RMSE = {train_mse}")
     print(f"Train set RMSLE = {train_rmsle}")
     print(f"Train set R2 = {train_r2}")

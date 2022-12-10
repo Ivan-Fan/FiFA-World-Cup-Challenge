@@ -10,7 +10,7 @@ import joblib
 
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
-from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor, RandomForestClassifier
 
 import pandas as pd
 import numpy as np
@@ -29,7 +29,6 @@ from sklearn.metrics import mean_squared_error, mean_squared_log_error, r2_score
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import PoissonRegressor
 
 from typing import List
@@ -129,6 +128,108 @@ class LGBTrainer:
             model_path = os.path.join(model_dir, 'lgb_model_' + target + '.txt')
             clf = lgb.Booster(model_file=model_path)
             y_preds[target] = clf.predict(test_x)
+            y_preds[target][y_preds[target] < 0] = 0
+
+        return y_preds
+
+
+class LGBClassifierTrainer:
+
+    def __init__(self, num_classes, boosting_type='gbdt', metric='multiclass', lr=0.1, epoch=100):
+
+        self.boosting_type = boosting_type
+        self.metric = metric
+        self.lr = lr
+        self.epoch = epoch
+        self.num_classes = num_classes
+
+    def train(self, train_x, train_y, val_x, val_y, save_dir):
+
+        os.makedirs(save_dir, exist_ok=True)
+        input_feat = train_x.columns
+        output_feat = train_y.columns
+
+        print("Start training!")
+        for target in ['home_score', 'away_score']:
+            y_train = train_y[target]
+            y_val = val_y[target]
+
+            # y_oof = np.zeros(train_x.shape[0])
+            rmse = 0
+            rmsle = 0
+            r2 = 0
+
+            params = {
+                'boosting_type': self.boosting_type,
+                'objective': self.metric, # multiclass
+                'metric': 'multi_logloss',
+                # 'max_depth': 10,
+                'learning_rate': self.lr,
+                'verbose': 0,
+                'num_threads': 8,
+                'num_classes': self.num_classes,
+                'n_estimators': 200}
+
+            # model = lgb.LGBMRegressor()
+
+            median_target = np.median(train_y.values)
+            feature_importances = pd.DataFrame()
+            feature_importances['feature'] = input_feat
+
+            scores = {
+                'rmse': 0.0,
+                'rmsle': 0.0,
+                'r2': 0.0,
+            }
+            X_train = train_x
+
+            dtrain = lgb.Dataset(X_train, label=y_train)
+            dvalid = lgb.Dataset(val_x, label=y_val)
+
+            clf = lgb.train(params, dtrain, self.epoch, early_stopping_rounds=10, valid_sets=[dtrain, dvalid])
+
+            feature_importances = pd.DataFrame()
+            feature_importances['feature'] = train_x.columns
+
+            feature_importances['importance'] = clf.feature_importance()
+
+            y_pred_valid = np.argmax(np.array(clf.predict(val_x)), axis=1)
+            y_pred_valid[y_pred_valid < 0] = median_target
+
+            scores['rmse'] = mean_squared_error(y_val, y_pred_valid, squared=False)
+            scores['rmsle'] = mean_squared_log_error(y_val, y_pred_valid, squared=False)
+            scores['r2'] = r2_score(y_val, y_pred_valid)
+            print(f"RMSE: {scores['rmse']} | RMSLE: {scores['rmsle']} | R2: {scores['r2']}")
+
+            rmse += scores['rmse']
+            rmsle += scores['rmsle']
+            r2 += scores['r2']
+
+            clf.save_model(os.path.join(save_dir, 'lgb_classifier_' + target + '.txt'))
+
+            del X_train, y_train
+            gc.collect()
+
+            ###############################
+            ##### Feature Analysis ########
+            ###############################
+
+        sns.set()
+        plt.figure(figsize=(20, 5))
+        sns.barplot(data=feature_importances.sort_values(by='importance', ascending=False).head(10), x='importance',
+                    y='feature')
+        plt.title('TOP feature importance')
+        plt.show()
+
+
+    def test(self, model_dir, train_x, train_y, test_x):
+
+        y_preds = pd.DataFrame()
+
+        for target in ['home_score', 'away_score']:
+            model_path = os.path.join(model_dir, 'lgb_classifier_' + target + '.txt')
+            clf = lgb.Booster(model_file=model_path)
+            y_preds[target] = np.argmax(clf.predict(test_x),axis=1)
             y_preds[target][y_preds[target] < 0] = 0
 
         return y_preds
@@ -313,6 +414,34 @@ class RandomForestTrainer:
 
     def test(self, model_dir, train_x, train_y, test_x):
         rfr = joblib.load(os.path.join(model_dir, 'RandomForest_model.pkl'))
+        y_preds = rfr.predict(test_x)
+        return y_preds
+
+class RandomForestClassifierTrainer:
+    def __init__(self, max_depth=6):
+        self.max_depth = max_depth
+
+    def train(self, train_x, train_y, val_x, val_y, save_dir):
+        # rfc = MultiOutputClassifier(RandomForestClassifier())
+        #
+        # dpt = [2, 6, 10]
+        # params = {"estimator__max_depth": dpt,
+        #           # "estimator__min_samples_split": [2, 3, 10],
+        #           # "estimator__min_samples_leaf": [1, 3, 10],
+        #           "estimator__criterion": ["gini", "entropy", "log_loss"]}
+        # tscv = TimeSeriesSplit(n_splits=5)
+        # classifier = GridSearchCV(rfc, params, cv=tscv, refit=False)
+        # classifier.fit(train_x, train_y)
+        # print("Best parameters: {}".format(classifier.best_params_))
+        # print("Results: {}".format(classifier.cv_results_))
+
+        rfr = MultiOutputClassifier(RandomForestClassifier(
+            max_depth=self.max_depth, criterion="entropy"))
+        rfr.fit(train_x, train_y)
+        joblib.dump(rfr, os.path.join(save_dir, "RandomForest_classifier_model.pkl"))
+
+    def test(self, model_dir, train_x, train_y, test_x):
+        rfr = joblib.load(os.path.join(model_dir, 'RandomForest_classifier_model.pkl'))
         y_preds = rfr.predict(test_x)
         return y_preds
 
