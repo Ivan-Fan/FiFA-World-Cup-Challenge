@@ -285,25 +285,31 @@ class KNNTrainer:
 
         print("Best parameters: {}".format(clf.best_params_))
 
-        val_y_preds = clf.predict(val_x)
+        # val_y_preds = clf.predict(val_x)
+        #
+        # print(f"Val set RMSE = {mean_squared_error(val_y, val_y_preds, squared=False)}")
+        # print(f"Val set RMSLE = {mean_squared_log_error(val_y, val_y_preds, squared=False)}")
+        # print(f"Val set R2 = {r2_score(val_y, val_y_preds)}")
 
-        print(f"Val set RMSE = {mean_squared_error(val_y, val_y_preds, squared=False)}")
-        print(f"Val set RMSLE = {mean_squared_log_error(val_y, val_y_preds, squared=False)}")
-        print(f"Val set R2 = {r2_score(val_y, val_y_preds)}")
+        # save
+        joblib.dump(clf, os.path.join(save_dir, "KNN_model.pkl"))
 
     def test(self, model_dir, train_x, train_y, test_x):
 
-        y_preds = pd.DataFrame()
+        # y_preds = pd.DataFrame()
+        #
+        # for target in ['home_score', 'away_score']:
+        #     # model_path = os.path.join(model_dir, 'KR_model_' + target + '.npy')
+        #     # clf_param = np.load(model_path, allow_pickle=True)
+        #
+        #     clf = KernelRidge(kernel=self.kernel, alpha=self.alpha)
+        #     clf.fit(train_x, train_y[target])
+        #
+        #     y_preds[target] = clf.predict(test_x)
+        #     y_preds[target][y_preds[target] < 0] = 0
 
-        for target in ['home_score', 'away_score']:
-            # model_path = os.path.join(model_dir, 'KR_model_' + target + '.npy')
-            # clf_param = np.load(model_path, allow_pickle=True)
-
-            clf = KernelRidge(kernel=self.kernel, alpha=self.alpha)
-            clf.fit(train_x, train_y[target])
-
-            y_preds[target] = clf.predict(test_x)
-            y_preds[target][y_preds[target] < 0] = 0
+        clf = joblib.load(os.path.join(model_dir, "KNN_model.pkl"))
+        y_preds = clf.predict(test_x)
 
         return y_preds
 
