@@ -35,8 +35,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data-dir', help='data directory', default='data/V2')
     parser.add_argument('--data-suffix', type=int, help='data version', default=3)
-    parser.add_argument('--model', type=str, help="Model: ['lgb', 'lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier', 'hmm', 'arima']",
-                        choices=['lgb','lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier', 'hmm', 'arima'], default='lgb')
+    parser.add_argument('--model', type=str, help="Model: ['lgb', 'lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier', 'hmm', 'arima', 'ensemble']",
+                        choices=['lgb','lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier', 'hmm', 'arima', 'ensemble'], default='lgb')
     parser.add_argument('--cur-year', type=int, help='test data version', default=2018)
     parser.add_argument('--model-dir', help='Directory for saving trained model files', default='models')
     args = parser.parse_args()
@@ -83,6 +83,10 @@ if __name__ == '__main__':
         model = HmmTrainer(num_classes=5)
     elif args.model == 'arima':
         model = ARIMATrainer()
+    elif args.model == 'ensemble':
+        model = EnsembleTrainer(weights=[0.3,0.3,-0.2,0.5], models=[MultiOutputRegressor(RandomForestRegressor(max_depth=2)),
+                                                        MultiOutputRegressor(GradientBoostingRegressor(learning_rate=0.05, n_estimators=100, max_depth=6)),
+                                                        ])
 
 
     ###############################
@@ -90,7 +94,7 @@ if __name__ == '__main__':
     ###############################
 
 
-    if args.model in ['lgb','lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier']:
+    if args.model in ['lgb','lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier', 'ensemble']:
         model.train(train_x, train_y, val_x, val_y, args.model_dir)
 
         # show the train metric / val metric
