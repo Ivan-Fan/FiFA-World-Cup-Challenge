@@ -89,6 +89,7 @@ if __name__ == '__main__':
     ##### Train and Evaluate ######
     ###############################
 
+
     if args.model in ['lgb','lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier']:
         model.train(train_x, train_y, val_x, val_y, args.model_dir)
 
@@ -130,4 +131,3 @@ if __name__ == '__main__':
     print(f"Test set MSE = {test_mse}")
     print(f"Test set RMSLE = {test_rmsle}")
     print(f"Test set R2 = {test_r2}")
->>>>>>> Stashed changes
