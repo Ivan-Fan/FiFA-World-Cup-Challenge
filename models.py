@@ -524,6 +524,17 @@ class HmmTrainer:
         print("Prediction =")
         print(preds)
 
+        test_y = {'Argentina': 1, 'Netherlands': 0, 'Crotia': 0, 'Brazil': 0, 'Morocco': 0, 'Portugal': 2, 'England': 0,
+                  'France': 1}
+        test_mses, test_rmsles, test_r2s = evaluate(list(test_y.values()), list(preds.values()))
+
+        print(f"Test set MSE = ")
+        print(test_mses)
+        print(f"Test set RMSLE = ")
+        print(test_rmsles)
+        print(f"Test set R2 = ")
+        print(test_r2s)
+
 class EnsembleTrainer:
     def __init__(self, weights=[0.3,0.3,-0.2,0.5], models=[MultiOutputRegressor(RandomForestRegressor(max_depth=2)),
                                                         MultiOutputRegressor(GradientBoostingRegressor(learning_rate=0.05, n_estimators=100, max_depth=6)),
@@ -557,16 +568,7 @@ class EnsembleTrainer:
         return y_preds
 
 
-        test_y = {'Argentina': 1, 'Netherlands': 0, 'Crotia': 0, 'Brazil': 0, 'Morocco': 0, 'Portugal': 2, 'England': 0,
-                  'France': 1}
-        test_mses, test_rmsles, test_r2s = evaluate(list(test_y.values()), list(preds.values()))
 
-        print(f"Test set MSE = ")
-        print(test_mses)
-        print(f"Test set RMSLE = ")
-        print(test_rmsles)
-        print(f"Test set R2 = ")
-        print(test_r2s)
 
 
 
