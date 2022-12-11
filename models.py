@@ -249,43 +249,15 @@ class KRTrainer:
         output_feat = train_y.columns
 
         print("Start training!")
-        for target in ['home_score', 'away_score']:
+        clf = MultiOutputRegressor(KernelRidge(kernel=self.kernel, alpha=self.alpha))
+        clf.fit(train_x, train_y)
+        joblib.dump(clf, os.path.join(save_dir, "KR_model.pkl"))
 
-            scores = {
-                'rmse': 0.0,
-                'rmsle': 0.0,
-                'r2': 0.0,
-            }
-            clf = KernelRidge(kernel=self.kernel, alpha=self.alpha)
-            clf.fit(train_x, train_y[target])
-
-            y_pred_valid = clf.predict(val_x)
-            y_pred_valid[y_pred_valid < 0] = 0
-            y_val = val_y[target]
-
-            scores['rmse'] = mean_squared_error(y_val, y_pred_valid, squared=False)
-            scores['rmsle'] = mean_squared_log_error(y_val, y_pred_valid, squared=False)
-            scores['r2'] = r2_score(y_val, y_pred_valid)
-            print(f"{target} | RMSE: {scores['rmse']} | RMSLE: {scores['rmsle']} | R2: {scores['r2']}")
-
-            clf_param = clf.get_params()
-            print(clf_param)
-            np.save(os.path.join(save_dir, 'KR_model_' + target + '.npy'), clf_param)
 
     def test(self, model_dir, train_x, train_y, test_x):
-
-        y_preds = pd.DataFrame()
-
-        for target in ['home_score', 'away_score']:
-
-            clf = KernelRidge(kernel=self.kernel, alpha=self.alpha)
-            # clf.fit(train_x, train_y[target])
-            model_path = os.path.join(model_dir, 'KR_model_' + target + '.npy')
-            clf_param = np.load(model_path, allow_pickle=True)
-            print(clf_param.dtype)
-            clf.set_params(**clf_param)
-            y_preds[target] = clf.predict(test_x)
-            y_preds[target][y_preds[target] < 0] = 0
+        clf = joblib.load(os.path.join(model_dir, "KR_model.pkl"))
+        y_preds = clf.predict(test_x)
+        y_preds[y_preds < 0] = 0
 
         return y_preds
 
