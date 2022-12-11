@@ -35,8 +35,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data-dir', help='data directory', default='data/V2')
     parser.add_argument('--data-suffix', type=int, help='data version', default=3)
-    parser.add_argument('--model', type=str, help="Model: ['lgb', 'lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier']",
-                        choices=['lgb','lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier'], default='lgb')
+    parser.add_argument('--model', type=str, help="Model: ['lgb', 'lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier', 'hmm', 'arima']",
+                        choices=['lgb','lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier', 'hmm', 'arima'], default='lgb')
     parser.add_argument('--cur-year', type=int, help='test data version', default=2018)
     parser.add_argument('--model-dir', help='Directory for saving trained model files', default='models')
     args = parser.parse_args()
@@ -79,26 +79,33 @@ if __name__ == '__main__':
         model = RandomForestTrainer(max_depth=2)
     elif args.model == 'random_forest_classifier':
         model = RandomForestClassifierTrainer(max_depth=6)
+    elif args.model == 'hmm':
+        model = HmmTrainer(num_classes=5)
+    elif args.model == 'arima':
+        model = ARIMATrainer()
 
 
     ###############################
     ##### Train and Evaluate ######
     ###############################
+    if args.model in ['lgb','lgb_classifier', 'kernel_ridge', 'gradient_boost', 'knn', 'poisson', 'random_forest', 'random_forest_classifier']:
+        model.train(train_x, train_y, val_x, val_y, args.model_dir)
 
-    model.train(train_x, train_y, val_x, val_y, args.model_dir)
-
-    # show the train metric / val metric
-    train_mse, train_rmsle, train_r2 = evaluate(train_y, model.test(args.model_dir, train_x, train_y, train_x))
-    val_mse, val_rmsle, val_r2 = evaluate(val_y, model.test(args.model_dir, train_x, train_y, val_x))
-    test_mse, test_rmsle, test_r2 = evaluate(test_y, model.test(args.model_dir, train_x, train_y, test_x))
-    print("test: \n",test_y)
-    print("pred: \n", model.test(args.model_dir, train_x, train_y, test_x))
-    print(f"Train set MSE = {train_mse}")
-    print(f"Train set RMSLE = {train_rmsle}")
-    print(f"Train set R2 = {train_r2}")
-    print(f"Valid set MSE = {val_mse}")
-    print(f"Valid set RMSLE = {val_rmsle}")
-    print(f"Valid set R2 = {val_r2}")
-    print(f"Test set MSE = {test_mse}")
-    print(f"Test set RMSLE = {test_rmsle}")
-    print(f"Test set R2 = {test_r2}")
+        # show the train metric / val metric
+        train_mse, train_rmsle, train_r2 = evaluate(train_y, model.test(args.model_dir, train_x, train_y, train_x))
+        val_mse, val_rmsle, val_r2 = evaluate(val_y, model.test(args.model_dir, train_x, train_y, val_x))
+        test_mse, test_rmsle, test_r2 = evaluate(test_y, model.test(args.model_dir, train_x, train_y, test_x))
+        print("test: \n",test_y)
+        print("pred: \n", model.test(args.model_dir, train_x, train_y, test_x))
+        print(f"Train set MSE = {train_mse}")
+        print(f"Train set RMSLE = {train_rmsle}")
+        print(f"Train set R2 = {train_r2}")
+        print(f"Valid set MSE = {val_mse}")
+        print(f"Valid set RMSLE = {val_rmsle}")
+        print(f"Valid set R2 = {val_r2}")
+        print(f"Test set MSE = {test_mse}")
+        print(f"Test set RMSLE = {test_rmsle}")
+        print(f"Test set R2 = {test_r2}")
+    else:
+        # time series
+        model.train_test(args.model_dir)

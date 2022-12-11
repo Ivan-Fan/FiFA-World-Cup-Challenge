@@ -29,7 +29,8 @@ from sklearn.metrics import mean_squared_error, mean_squared_log_error, r2_score
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.linear_model import PoissonRegressor
+# from sklearn.linear_model import PoissonRegressor
+from utils import evaluate
 
 from typing import List
 
@@ -416,4 +417,96 @@ class RandomForestClassifierTrainer:
         rfr = joblib.load(os.path.join(model_dir, 'RandomForest_classifier_model.pkl'))
         y_preds = rfr.predict(test_x)
         return y_preds
+
+from statsmodels.tsa.arima.model import ARIMA
+class ARIMATrainer:
+    def __init__(self):
+        self.data_dir = 'data/V3'
+        self.time_series_data = dict()
+
+    def load_time_series(self):
+        for team in ['Argentina', 'Netherlands', 'Croatia', 'Brazil', 'Morocco', 'Portugal', 'England', 'France']:
+            self.time_series_data[team] = pd.read_pickle(os.path.join(self.data_dir, '{}.pkl'.format(team)))
+
+    def train_test(self, save_dir):
+        self.load_time_series()
+        # Stationary Analysis
+        fig = plt.figure()
+        plt.plot(self.time_series_data['Argentina'])
+        plt.xlabel("Time Step")
+        plt.ylabel("Scores")
+        plt.title("History Performance of Argentina")
+
+        fig = plt.figure()
+        plt.plot(self.time_series_data['Netherlands'])
+        plt.xlabel("Time Step")
+        plt.ylabel("Scores")
+        plt.title("History Performance of Netherlands")
+
+        arima_models, arima_predictions = dict(), dict()
+        mses, rmsles, r2s = dict(), dict(), dict()
+        for k, v in self.time_series_data.items():
+            model = ARIMA(self.time_series_data[k], order=(1, 1, 2))
+            trained_model = model.fit()
+            arima_models[k] = trained_model
+
+            train_score = self.time_series_data[k]
+            train_predicted_score = trained_model.predict(start=0, end=len(self.time_series_data[k]) - 1)
+            mses[k], rmsles[k], r2s[k] = evaluate(train_score, train_predicted_score)
+            predicted_score = trained_model.predict(len(self.time_series_data[k]))
+            arima_predictions[k] = float(predicted_score)
+
+        print(f"Train set MSE = ")
+        print(mses)
+        print(f"Train set RMSLE = ")
+        print(rmsles)
+        print(f"Train set R2 = ")
+        print(r2s)
+        print("Prediction =")
+        print(arima_predictions)
+
+from hmmlearn import hmm
+import pickle
+import collections
+class HmmTrainer:
+    def __init__(self, num_classes):
+        self.num_classes = num_classes
+        self.data_dir = 'data/V3'
+        self.time_series_data = dict()
+
+    def train_test(self, save_dir):
+        scores = collections.defaultdict(list)
+        mses, rmsles, r2s = {}, {}, {}
+        for team in ['Argentina', 'Netherlands', 'Croatia', 'Brazil', 'Morocco', 'Portugal', 'England', 'France']:
+            for n_components in range(1, self.num_classes):
+                print("hmm_" + str(team) + ".pkl")
+                remodel = hmm.GaussianHMM(n_components=n_components, covariance_type="full", n_iter=20)
+                self.time_series_data[team] = pd.read_pickle(os.path.join(self.data_dir, '{}.pkl'.format(team)))
+                remodel.fit(self.time_series_data[team])
+                curr = remodel.score(self.time_series_data[team])
+                if not scores[team] or max(scores[team]) < curr:
+                    with open(os.path.join(save_dir, "hmm_" + str(team) + ".pkl"), "wb") as file:
+                        pickle.dump(remodel, file)
+                scores[team].append(curr)
+                print(f'Converged: {remodel.monitor_.converged}\t\t'
+                      f'Score: {scores[team][-1]}')
+
+            states = remodel.predict(self.time_series_data[team])
+            # mses[team], rmsles[team], r2s[team] = evaluate(self.time_series_data[team], remodel.lambdas_[states])
+
+        preds = {}
+        for team in ['Argentina', 'Netherlands', 'Croatia', 'Brazil', 'Morocco', 'Portugal', 'England', 'France']:
+            with open(os.path.join("models", "hmm_" + str(team) + ".pkl"), "rb") as file:
+                remodel = pickle.load(file)
+                preds[team] = remodel.sample(1)[0]
+
+        # print(f"Train set MSE = ")
+        # print(mses)
+        # print(f"Train set RMSLE = ")
+        # print(rmsles)
+        # print(f"Train set R2 = ")
+        # print(r2s)
+        print("Prediction =")
+        print(preds)
+
 
