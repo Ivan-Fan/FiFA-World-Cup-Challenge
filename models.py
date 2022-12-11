@@ -418,7 +418,7 @@ class RandomForestClassifierTrainer:
         y_preds = rfr.predict(test_x)
         return y_preds
 
-from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.arima.model import ARIMA, ARIMAResults
 class ARIMATrainer:
     def __init__(self):
         self.data_dir = 'data/V3'
@@ -449,7 +449,9 @@ class ARIMATrainer:
             model = ARIMA(self.time_series_data[k], order=(1, 1, 2))
             trained_model = model.fit()
             arima_models[k] = trained_model
-
+            # model saving
+            trained_model.save(os.path.join(save_dir, "arima_" + str(k) + ".pkl"))
+            trained_model = ARIMAResults.load(os.path.join(save_dir, "arima_" + str(k) + ".pkl"))
             train_score = self.time_series_data[k]
             train_predicted_score = trained_model.predict(start=0, end=len(self.time_series_data[k]) - 1)
             mses[k], rmsles[k], r2s[k] = evaluate(train_score, train_predicted_score)
