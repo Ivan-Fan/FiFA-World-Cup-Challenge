@@ -285,28 +285,8 @@ class KNNTrainer:
 
         print("Best parameters: {}".format(clf.best_params_))
 
-        val_y_preds = clf.predict(val_x)
-
-        print(f"Val set RMSE = {mean_squared_error(val_y, val_y_preds, squared=False)}")
-        print(f"Val set RMSLE = {mean_squared_log_error(val_y, val_y_preds, squared=False)}")
-        print(f"Val set R2 = {r2_score(val_y, val_y_preds)}")
-
-    def test(self, model_dir, train_x, train_y, test_x):
-
-        y_preds = pd.DataFrame()
-
-        for target in ['home_score', 'away_score']:
-            # model_path = os.path.join(model_dir, 'KR_model_' + target + '.npy')
-            # clf_param = np.load(model_path, allow_pickle=True)
-
-            clf = KernelRidge(kernel=self.kernel, alpha=self.alpha)
-            clf.fit(train_x, train_y[target])
-
-            y_preds[target] = clf.predict(test_x)
-            y_preds[target][y_preds[target] < 0] = 0
-
-        return y_preds
-
+        # save
+        joblib.dump(clf, os.path.join(save_dir, "KNN_model.pkl"))
 
 class PoissonRegressor:
     def __init__(self, alpha: 0.1):
@@ -443,8 +423,11 @@ class ARIMATrainer:
         plt.ylabel("Scores")
         plt.title("History Performance of Netherlands")
 
+        test_y = {'Argentina':1, 'Netherlands':0, 'Crotia': 0, 'Brazil':0, 'Morocco':0, 'Portugal':2, 'England':0, 'France':1}
+
         arima_models, arima_predictions = dict(), dict()
         mses, rmsles, r2s = dict(), dict(), dict()
+        test_mses, test_rmsles, test_r2s = 0,0,0
         for k, v in self.time_series_data.items():
             model = ARIMA(self.time_series_data[k], order=(1, 1, 2))
             trained_model = model.fit()
@@ -458,12 +441,20 @@ class ARIMATrainer:
             predicted_score = trained_model.predict(len(self.time_series_data[k]))
             arima_predictions[k] = float(predicted_score)
 
+        test_mses, test_rmsles, test_r2s = evaluate(list(test_y.values()), list(arima_predictions.values()))
+
         print(f"Train set MSE = ")
         print(mses)
         print(f"Train set RMSLE = ")
         print(rmsles)
         print(f"Train set R2 = ")
         print(r2s)
+        print(f"Test set MSE = ")
+        print(test_mses)
+        print(f"Test set RMSLE = ")
+        print(test_rmsles)
+        print(f"Test set R2 = ")
+        print(test_r2s)
         print("Prediction =")
         print(arima_predictions)
 
@@ -500,15 +491,25 @@ class HmmTrainer:
         for team in ['Argentina', 'Netherlands', 'Croatia', 'Brazil', 'Morocco', 'Portugal', 'England', 'France']:
             with open(os.path.join("models", "hmm_" + str(team) + ".pkl"), "rb") as file:
                 remodel = pickle.load(file)
-                preds[team] = remodel.sample(1)[0]
+                preds[team] = remodel.sample(1)[0][0][0] if remodel.sample(1)[0][0][0] > 0 else 0
 
-        # print(f"Train set MSE = ")
-        # print(mses)
-        # print(f"Train set RMSLE = ")
-        # print(rmsles)
-        # print(f"Train set R2 = ")
-        # print(r2s)
+        print("Scores =")
+        print(scores)
+
         print("Prediction =")
         print(preds)
+
+
+        test_y = {'Argentina': 1, 'Netherlands': 0, 'Crotia': 0, 'Brazil': 0, 'Morocco': 0, 'Portugal': 2, 'England': 0,
+                  'France': 1}
+        test_mses, test_rmsles, test_r2s = evaluate(list(test_y.values()), list(preds.values()))
+
+        print(f"Test set MSE = ")
+        print(test_mses)
+        print(f"Test set RMSLE = ")
+        print(test_rmsles)
+        print(f"Test set R2 = ")
+        print(test_r2s)
+
 
 
