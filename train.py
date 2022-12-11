@@ -113,7 +113,7 @@ if __name__ == '__main__':
         model.train_test(args.model_dir)
 
 
-    model.train(train_x, train_y, val_x, val_y, args.model_dir)
+    # model.train(train_x, train_y, val_x, val_y, args.model_dir)
     # model = EnsembleTrainer()
 
     # show the train metric / val metric
