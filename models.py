@@ -250,7 +250,7 @@ class KRTrainer:
         output_feat = train_y.columns
 
         print("Start training!")
-        clf = MultiOutputRegressor(KernelRidge(kernel=self.kernel, alpha=self.alpha))
+        clf = MultiOutputRegressor(KernelRidge(kernel=self.kernel, alpha=self.alpha, gamma=0))
         clf.fit(train_x, train_y)
         joblib.dump(clf, os.path.join(save_dir, "KR_model.pkl"))
 
@@ -259,7 +259,7 @@ class KRTrainer:
         clf = joblib.load(os.path.join(model_dir, "KR_model.pkl"))
         y_preds = clf.predict(test_x)
         y_preds[y_preds < 0] = 0
-
+        print("kernel", y_preds.shape)
         return y_preds
 
 
@@ -351,7 +351,7 @@ class GradientBoostTrainer:
         # print("Results: {}".format(regressor.cv_results_))
 
         gbr = MultiOutputRegressor(GradientBoostingRegressor(
-            learning_rate=self.lr, n_estimators=self.n_estimators))
+            learning_rate=self.lr, n_estimators=self.n_estimators, max_depth=6))
         gbr.fit(train_x, train_y)
         joblib.dump(gbr, os.path.join(save_dir, "GradientBoost_model.pkl"))
 
@@ -381,7 +381,7 @@ class RandomForestTrainer:
         # print("Results: {}".format(regressor.cv_results_))
 
         rfr = MultiOutputRegressor(RandomForestRegressor(
-            max_depth=2))
+            max_depth=6))
         rfr.fit(train_x, train_y)
         joblib.dump(rfr, os.path.join(save_dir, "RandomForest_model.pkl"))
 
@@ -510,5 +510,37 @@ class HmmTrainer:
         # print(r2s)
         print("Prediction =")
         print(preds)
+
+class EnsembleTrainer:
+    def __init__(self, weights=[0.3,0.3,-0.2,0.5], models=[MultiOutputRegressor(RandomForestRegressor(max_depth=2)),
+                                                        MultiOutputRegressor(GradientBoostingRegressor(learning_rate=0.05, n_estimators=100, max_depth=6)),
+                                                        ]):
+        self.weights = weights
+        self.models = models
+        self.core_model_trainer = LGBTrainer(boosting_type='gbdt', metric='rmse', lr=0.1, epoch=100)
+
+    def train(self, train_x, train_y, val_x, val_y, save_dir):
+
+        pass
+
+    def test(self, model_dir, train_x, train_y, test_x):
+
+        rfr = joblib.load(os.path.join(model_dir, 'RandomForest_model.pkl'))
+        gbr = joblib.load(os.path.join(model_dir, "GradientBoost_model.pkl"))
+        kr = joblib.load(os.path.join(model_dir, "KR_model.pkl"))
+        y_preds = pd.DataFrame()
+        for target in ['home_score', 'away_score']:
+            model_path = os.path.join(model_dir, 'lgb_model_' + target + '.txt')
+            clf = lgb.Booster(model_file=model_path)
+            y_preds[target] = clf.predict(test_x)
+            y_preds[target][y_preds[target] < 0] = 0
+        print(y_preds.shape)
+        y_preds = y_preds*self.weights[3]
+        y_preds += rfr.predict(test_x)*self.weights[0]
+        y_preds += gbr.predict(test_x)*self.weights[1]
+
+        # y_preds += kr.predict(test_x)*self.weights[2]
+        y_preds += abs(y_preds.to_numpy().min())
+        return y_preds
 
 
